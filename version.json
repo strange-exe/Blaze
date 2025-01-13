@@ -1,0 +1,8 @@
+{
+  "version": "1.1.2",
+  "changelog": [
+    "Added **update embed** feature in `/embed` using __message_id__",
+    "Added **media** field in `/embed`",
+    "Other minor bug fixes"
+  ]
+}
