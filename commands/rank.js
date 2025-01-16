@@ -23,7 +23,7 @@ module.exports = {
             if (!userStats) {
                 return interaction.reply({
                     content: `${user.username} hasn't sent any messages yet! Start participating to earn XP.`,
-                    ephemeral: true,
+                    ephemeral: false,
                 });
             }
 
@@ -42,7 +42,7 @@ module.exports = {
             await interaction.reply({
                 content: `Here is your rank info, ${user.username}!`,
                 files: [rankImage],
-                ephemeral: true,
+                ephemeral: false,
             });
 
         } catch (error) {
