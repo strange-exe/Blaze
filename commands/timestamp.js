@@ -15,8 +15,8 @@ module.exports = {
     ),
   aliases: ['ts', 'time'],
 
-  // Traditional command execution
-  async execute(message, args) {
+  // Traditional command execution (renamed to executeText)
+  async executeText(message, args) {
     try {
       if (!args.length) {
         return await this.generateTimestampEmbed(message, true);
