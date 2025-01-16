@@ -49,7 +49,7 @@ async function executeAvatar(interaction, ephemeral) {
         // Add the button to the row
         const row = new ActionRowBuilder().addComponents(downloadButton);
 
-        await interaction.reply({ embeds: [embed], components: [row], ephemeral });
+        await interaction.reply({ embeds: [embed], components: [row], ephemeral: false });
 
     } catch (error) {
         console.error('Error fetching avatar:', error);
