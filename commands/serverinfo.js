@@ -35,7 +35,7 @@ async function executeServerInfo(interactionOrMessage, ephemeral) {
                 
             // Respond with the error message
             if (isInteraction) {
-                await interactionOrMessage.reply({ embeds: [dmErrorEmbed], ephemeral });
+                await interactionOrMessage.reply({ embeds: [dmErrorEmbed], ephemeral: false });
             } else {
                 await interactionOrMessage.channel.send({ embeds: [dmErrorEmbed] });
             }
@@ -82,7 +82,7 @@ async function executeServerInfo(interactionOrMessage, ephemeral) {
 
         // Reply or send the message based on the context
         if (isInteraction) {
-            await interactionOrMessage.reply({ embeds: [embed], ephemeral });
+            await interactionOrMessage.reply({ embeds: [embed], ephemeral: false });
         } else {
             await interactionOrMessage.channel.send({ embeds: [embed] });
         }
