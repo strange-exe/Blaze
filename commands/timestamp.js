@@ -13,6 +13,7 @@ module.exports = {
         .setDescription('Custom date (e.g., "2024-01-01" or "2024-01-01 15:30")')
         .setRequired(false)
     ),
+  aliases: ['ts','time'], 
 
   // Traditional command execution
   execute(message, args) {
