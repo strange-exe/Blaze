@@ -1,58 +1,70 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { OpenAI } = require('openai');  // Correct import
 
-// Initialize OpenAI API client
-const openai = new OpenAI({
-  apiKey: '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', // Replace with your OpenAI API key
-});
+// Dynamically import 'node-fetch' to support CommonJS
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('quote')
-    .setDescription('Get a motivational quote'),
+    .setDescription('Get a random quote'),
   aliases: ['q'],
-
   async executeText(message) {
     try {
-      const quote = await generateQuote();
-      message.reply(`_\`"${quote}"\`_\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
+      // Fetch the quote
+      const response = await fetch('https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json');
+      const rawText = await response.text();
+      console.log('Raw Response:', rawText); // Debugging
+
+      // Fix malformed JSON by escaping single quotes
+      const sanitizedText = rawText.replace(/\\'/g, "'").replace(/'/g, "\\'");
+
+      let data;
+      try {
+        data = JSON.parse(sanitizedText); // Attempt to parse sanitized JSON
+      } catch (error) {
+        console.error('Still Malformed JSON:', sanitizedText);
+        throw new Error('Received malformed JSON from the API.');
+      }
+
+      // Extract quote and author
+      const quote = data.quoteText?.trim() || 'No quote available at the moment.';
+      const author = data.quoteAuthor?.trim() || 'Abhinesh';
+
+      // Reply with the quote
+      message.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
     } catch (error) {
-      console.error('Error generating quote:', error);
-      message.reply('Oops! Unable to generate a quote at the moment. Please try again later.');
+      console.error('Error fetching quote:', error);
+      message.reply('Oops! No quote available at the moment , kindly try again after some time');
     }
   },
 
   async execute(interaction) {
     try {
-      const quote = await generateQuote();
-      await interaction.reply(`_\`"${quote}"\`_\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
+      // Fetch the quote
+      const response = await fetch('https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json');
+      const rawText = await response.text();
+      console.log('Raw Response:', rawText); // Debugging
+
+      // Fix malformed JSON by escaping single quotes
+      const sanitizedText = rawText.replace(/\\'/g, "'").replace(/'/g, "\\'");
+
+      let data;
+      try {
+        data = JSON.parse(sanitizedText); // Attempt to parse sanitized JSON
+      } catch (error) {
+        console.error('Still Malformed JSON:', sanitizedText);
+        throw new Error('Received malformed JSON from the API.');
+      }
+
+      // Extract quote and author
+      const quote = data.quoteText?.trim() || 'No quote available at the moment.';
+      const author = data.quoteAuthor?.trim() || 'Abhinesh';
+
+      // Reply with the quote
+      await interaction.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
     } catch (error) {
-      console.error('Error generating quote:', error);
-      await interaction.reply('Oops! Unable to generate a quote at the moment. Please try again later.');
+      console.error('Error fetching quote:', error);
+      await interaction.reply('Oops! No quote available at the moment , kindly try again after some time');
     }
   },
 };
-
-
-// Helper function to generate a quote using OpenAI
-async function generateQuote() {
-  try {
-    const completion = openai.chat.completions.create({
-      model: "GPT-4o mini",
-      store: true,
-      messages: [
-        {"role": "user", "content": "write a motivational quote"},
-      ],
-    });
-
-    // Extract the quote from the response
-    const quote = completion.choices[0].message.content.trim();
-    if (!quote) {
-      throw new Error('No quote generated');
-    }
-    return quote;
-  } catch (error) {
-    console.error('Error generating quote with OpenAI:', error);
-    throw new Error('Failed to generate quote');
-  }
-}
