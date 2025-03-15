@@ -114,11 +114,28 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
+const TARGET_USER_ID = "1158709904933126235"; // Anshi
+const EMOJI_ID = "1176178649842589758"; // Yummi Emoji
+
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
+    if (message.author.id === TARGET_USER_ID) {
+        try {
+            const emoji = `<:${message.guild.emojis.cache.get(EMOJI_ID)?.name}:${EMOJI_ID}>`;
+            if (emoji) {
+                await message.reply(emoji);
+            } else {
+                console.warn(`Emoji with ID ${EMOJI_ID} not found in this server.`);
+            }
+        } catch (err) {
+            console.error("Error replying with emoji:", err);
+        }
+    }
+
     getPrefix(message.guild.id, async (prefix) => {
         if (!message.content.startsWith(prefix)) return;
+        if (message.content.trim() === prefix) return;
 
         const args = message.content.slice(prefix.length).trim().split(/ +/);
         const commandName = args.shift().toLowerCase();
