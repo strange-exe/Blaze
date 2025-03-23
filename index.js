@@ -292,9 +292,9 @@ client.once('ready', async () => {
     setInterval(() => presence.setBotPresence(client, defaultPrefix), 60 * 60 * 1000);
 
     // Other initialization tasks
-    await scheduleUpdateCheck();
-    await startVersionMonitor();
-    await initialize();
+    await scheduleUpdateCheck(webhookURL);
+    await startVersionMonitor(webhookURL);
+    await initialize(webhookURL);
 });
 
 client.on('reconnect', async () => {
@@ -302,43 +302,78 @@ client.on('reconnect', async () => {
     await presence.setBotPresence(client, defaultPrefix);
 });
 
-
 // Watch all files in the bot's directory and subdirectories
 const watcher = chokidar.watch(__dirname, {
     persistent: true,
     ignoreInitial: true,
-    depth: 10,  // Watch up to 10 levels deep
+    depth: 10,
     ignored: [
         '**/*.log',         // Ignore all .log files
         '**/chat_log.txt',  // Specifically ignore chat_log.txt
     ],
 });
 
-watcher.on('change', (filePath) => {
-    console.log(`File changed: ${filePath}`);
-    delete require.cache[require.resolve(filePath)];
-    if (filePath.includes('commands')) {
-        client.commands.clear();
-        loadCommands(path.join(__dirname, 'commands'));
+// Reload a specific command file
+const reloadCommand = (filePath) => {
+    try {
+        if (!fs.existsSync(filePath)) return console.log(`Command deleted: ${filePath}`);
+
+        const commandName = path.basename(filePath, '.js');
+        delete require.cache[require.resolve(filePath)];
+        const newCommand = require(filePath);
+
+        if (newCommand && newCommand.name) {
+            client.commands.set(newCommand.name, newCommand);
+            console.log(`🔄 Reloaded command: ${newCommand.name}`);
+        } else {
+            console.warn(`⚠️ Skipping ${commandName}: Missing "name" property.`);
+        }
+    } catch (err) {
+        console.error(`❌ Error reloading command ${filePath}:`, err);
     }
-    if (filePath.includes('events')) {
-        loadEvents(path.join(__dirname, 'events'));
+};
+
+// Reload a specific event file
+const reloadEvent = (filePath) => {
+    try {
+        if (!fs.existsSync(filePath)) return console.log(`Event deleted: ${filePath}`);
+
+        const eventName = path.basename(filePath, '.js');
+        delete require.cache[require.resolve(filePath)];
+        const newEvent = require(filePath);
+
+        // Remove previous event listener and re-add it
+        client.removeAllListeners(eventName);
+        client.on(eventName, newEvent.bind(null, client));
+        console.log(`🔄 Reloaded event: ${eventName}`);
+    } catch (err) {
+        console.error(`❌ Error reloading event ${filePath}:`, err);
+    }
+};
+
+// Watch for file changes
+watcher.on('change', (filePath) => {
+    console.log(`📂 File changed: ${filePath}`);
+
+    if (filePath.endsWith('.js')) {
+        if (filePath.includes('commands')) {
+            reloadCommand(filePath);
+        } else if (filePath.includes('events')) {
+            reloadEvent(filePath);
+        }
     }
 });
 
-// Watch for file creation (if required)
+// Watch for new files being added
 watcher.on('add', (filePath) => {
-    console.log(`File added: ${filePath}`);
-    
-    // Handle newly added command files
-    if (filePath.includes('commands')) {
-        client.commands.clear();
-        loadCommands(path.join(__dirname, 'commands'));
-    }
+    console.log(`📂 New file detected: ${filePath}`);
 
-    // Handle newly added event files
-    if (filePath.includes('events')) {
-        loadEvents(path.join(__dirname, 'events'));
+    if (filePath.endsWith('.js')) {
+        if (filePath.includes('commands')) {
+            reloadCommand(filePath);
+        } else if (filePath.includes('events')) {
+            reloadEvent(filePath);
+        }
     }
 });
 
