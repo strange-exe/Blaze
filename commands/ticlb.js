@@ -1,18 +1,34 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { pool } = require('../utils/db.js');
 
 module.exports = {
     name: 'leaderboard',
-    description: 'View the Tic-Tac-Toe (Cross Zero) leaderboard.',
+    description: 'View or reset the Tic-Tac-Toe (Cross Zero) leaderboard.',
     aliases: ['xolb', 'lb'],
     data: new SlashCommandBuilder()
         .setName('leaderboard')
-        .setDescription('View the Tic-Tac-Toe leaderboard'),
-    async executeText(message) {
-        await executeLeaderboard(message);
+        .setDescription('Manage the Tic-Tac-Toe leaderboard')
+        .addSubcommand(subcommand => 
+            subcommand.setName('view')
+                .setDescription('View the Tic-Tac-Toe leaderboard')
+        )
+        .addSubcommand(subcommand => 
+            subcommand.setName('reset')
+                .setDescription('Reset the Tic-Tac-Toe leaderboard (Bot Owner Only)')
+        ),
+    async executeText(message, args) {
+        if (args[0] === 'reset') {
+            await resetLeaderboard(message);
+        } else {
+            await executeLeaderboard(message);
+        }
     },
     async executeSlash(interaction) {
-        await executeLeaderboard(interaction);
+        if (interaction.options.getSubcommand() === 'reset') {
+            await resetLeaderboard(interaction);
+        } else {
+            await executeLeaderboard(interaction);
+        }
     }
 };
 
@@ -33,5 +49,19 @@ async function executeLeaderboard(context) {
     } catch (error) {
         console.error('Error fetching leaderboard:', error);
         await context.reply({ content: 'An error occurred while retrieving the leaderboard.', ephemeral: true });
+    }
+}
+
+async function resetLeaderboard(context) {
+    if (context.user?.id !== '1023977968562876536' && context.author?.id !== '1023977968562876536') {
+        return context.reply({ content: 'You do not have permission to reset the leaderboard.', ephemeral: true });
+    }
+    
+    try {
+        await pool.execute('DELETE FROM leaderboard');
+        await context.reply({ content: 'The Tic-Tac-Toe leaderboard has been reset.', ephemeral: false });
+    } catch (error) {
+        console.error('Error resetting leaderboard:', error);
+        await context.reply({ content: 'An error occurred while resetting the leaderboard.', ephemeral: true });
     }
 }
