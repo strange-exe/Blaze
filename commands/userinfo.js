@@ -52,7 +52,7 @@ async function executeUserInfo(interactionOrMessage, ephemeral) {
             .addFields(
                 {
                     name: '**General Information**',
-                    value: `>>> **Username:** ${target.tag}\n**ID:** \`${target.id}\`\n**Mention:** ${target}\n**Account Created:** <t:${Math.floor(target.createdTimestamp / 1000)}:R>\n[Avatar](${target.displayAvatarURL({ dynamic: true })})${bannerURL ? ` | [Banner](${bannerURL})` : ''}`,
+                    value: `>>> **Username:** ${target.tag}\n**ID:** \`${target.id}\`\n**Mention:** ${target}\n**Account Created:** <t:${Math.floor(target.createdTimestamp / 1000)}:R>\n[Download Avatar](${target.displayAvatarURL({ dynamic: true })})${bannerURL ? ` | [Download Banner](${bannerURL})` : ''}`,
                     inline: false
                 }
             )
