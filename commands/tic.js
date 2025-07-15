@@ -57,9 +57,22 @@ async function startGame(context, player1, player2) {
         if (!interaction.isButton()) return;
 
         if (interaction.customId === 'end') {
-            collector.stop('ended');
-            return interaction.update({ content: 'Game has been manually ended!', components: [] });
+            const isPlayer = interaction.user.id === player1.id || interaction.user.id === player2.id;
+            const isAdmin = interaction.member.permissions.has('ManageGuild');
+
+            if (isAdmin) {
+                collector.stop('ended');
+                return interaction.update({ content: `Game has been ended by admin ${interaction.user}.`, components: [] });
+            }
+
+            if (isPlayer && moves < 2) {
+                collector.stop('ended');
+                return interaction.update({ content: `Game has been ended early by ${interaction.user}.`, components: [] });
+            }
+
+            return interaction.reply({ content: 'You cannot end the game after it has started, unless you are an admin.', ephemeral: true });
         }
+
 
         if (interaction.user.id !== turn.id) {
             return interaction.reply({ content: 'It\'s not your turn!', ephemeral: true });
