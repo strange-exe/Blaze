@@ -1,13 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta http-equiv="refresh" content="0; url=https://discord.com/oauth2/authorize?client_id=1064476252792160297">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blaze Discord Bot</title>
+    <link href="https://cdn.tailwindcss.com" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #4e73df, #6c5ce7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 1.2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+    </style>
     <script>
-        window.location.href = "https://discord.com/oauth2/authorize?client_id=1064476252792160297";
+        setTimeout(() => {
+            window.location.href = "https://discord.com/oauth2/authorize?client_id=1064476252792160297";
+        }, 5000);
     </script>
-    <title>Redirecting...</title>
 </head>
 <body>
-    <p>Redirecting to the Blaze bot invite page...</p>
+    <div class="card max-w-md">
+        <h1 class="text-4xl font-bold mb-4">🚀 Blaze is Ready!</h1>
+        <p class="text-lg mb-6">You’ll be redirected to invite Blaze to your Discord server in a few seconds.</p>
+        <a href="https://discord.com/oauth2/authorize?client_id=1064476252792160297" 
+           class="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-semibold transition">
+           Invite Blaze Now
+        </a>
+        <p class="mt-4 text-sm opacity-75">If you’re not redirected, click the button above.</p>
+    </div>
 </body>
 </html>
