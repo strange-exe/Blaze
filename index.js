@@ -114,24 +114,24 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-const TARGET_USER_ID = "1158709904933126235"; // Anshi
-const EMOJI_ID = "1176178649842589758"; // Yummi Emoji
+// const TARGET_USER_ID = "1158709904933126235"; // Anshi
+// const EMOJI_ID = "1176178649842589758"; // Yummi Emoji
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
-    if (message.author.id === TARGET_USER_ID) {
-        try {
-            const emoji = `<:${message.guild.emojis.cache.get(EMOJI_ID)?.name}:${EMOJI_ID}>`;
-            if (emoji) {
-                await message.reply(emoji);
-            } else {
-                console.warn(`Emoji with ID ${EMOJI_ID} not found in this server.`);
-            }
-        } catch (err) {
-            console.error("Error replying with emoji:", err);
-        }
-    }
+   // if (message.author.id === TARGET_USER_ID) {
+   //     try {
+   //         const emoji = `<:${message.guild.emojis.cache.get(EMOJI_ID)?.name}:${EMOJI_ID}>`;
+   //         if (emoji) {
+   //             await message.reply(emoji);
+   //         } else {
+   //             console.warn(`Emoji with ID ${EMOJI_ID} not found in this server.`);
+   //         }
+   //     } catch (err) {
+   //         console.error("Error replying with emoji:", err);
+   //     }
+   // }
 
     getPrefix(message.guild.id, async (prefix) => {
         if (!message.content.startsWith(prefix)) return;
@@ -167,9 +167,41 @@ client.on('messageCreate', async (message) => {
     });
 });
 
+const { Events } = require('discord.js');
+const { yummiListeners, yummiCooldowns } = require('./utils/yummiStore');
+const EMOJI_ID = "1176178649842589758"; // Replace with your emoji ID
+
+client.on(Events.MessageCreate, async (message) => {
+    if (message.author.bot || !message.guild) return;
+
+    const settings = yummiListeners.get(message.guild.id);
+    if (!settings) return;
+
+    if (message.author.id === settings.userId) {
+        if (settings.channelId && message.channel.id !== settings.channelId) return;
+
+        const lastUsed = yummiCooldowns.get(message.author.id) || 0;
+        const now = Date.now();
+
+        if (now - lastUsed < 5000) return; // 5s cooldown
+        yummiCooldowns.set(message.author.id, now);
+
+        try {
+            const emoji = `<:${message.guild.emojis.cache.get(EMOJI_ID)?.name}:${EMOJI_ID}>`;
+            if (emoji.includes("undefined")) return;
+
+            await message.reply(emoji);
+        } catch (err) {
+            console.error("Error replying with emoji:", err);
+        }
+    }
+});
+
 
 // Handle guild member joins
 client.on('guildMemberAdd', async (member) => {
+    if (member.user.bot) return; // Ignore bot joins
+
     const guildId = member.guild.id;
 
     try {
@@ -256,6 +288,7 @@ client.on('guildMemberAdd', async (member) => {
     }
 });
 
+
 // Bot ready event
 const setBotPresence = async () => {
     try {
@@ -313,7 +346,6 @@ const watcher = chokidar.watch(__dirname, {
     ],
 });
 
-// Reload a specific command file
 const reloadCommand = (filePath) => {
     try {
         if (!fs.existsSync(filePath)) return console.log(`Command deleted: ${filePath}`);
@@ -322,11 +354,13 @@ const reloadCommand = (filePath) => {
         delete require.cache[require.resolve(filePath)];
         const newCommand = require(filePath);
 
-        if (newCommand && newCommand.name) {
-            client.commands.set(newCommand.name, newCommand);
-            console.log(`🔄 Reloaded command: ${newCommand.name}`);
+        // Use data.name for slash commands, fallback to name for text commands
+        const cmdName = newCommand.data?.name || newCommand.name;
+        if (cmdName) {
+            client.commands.set(cmdName, newCommand);
+            console.log(`🔄 Reloaded command: ${cmdName}`);
         } else {
-            console.warn(`⚠️ Skipping ${commandName}: Missing "name" property.`);
+            console.warn(`⚠️ Skipping ${commandName}: Missing "name" or "data.name" property.`, newCommand);
         }
     } catch (err) {
         console.error(`❌ Error reloading command ${filePath}:`, err);
