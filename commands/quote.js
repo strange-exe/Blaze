@@ -31,7 +31,7 @@ module.exports = {
       const author = data.quoteAuthor?.trim() || 'Abhinesh';
 
       // Reply with the quote
-      message.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
+      message.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://abhinesh.me/quotes)**`);
     } catch (error) {
       console.error('Error fetching quote:', error);
       message.reply('Oops! No quote available at the moment , kindly try again after some time');
@@ -61,7 +61,7 @@ module.exports = {
       const author = data.quoteAuthor?.trim() || 'Abhinesh';
 
       // Reply with the quote
-      await interaction.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://gen-quotes.netlify.app)**`);
+      await interaction.reply(`_\`"${quote}"\`_ - ${author}\n-# quotes by **[Abhinesh](https://abhinesh.me/quotes)**`);
     } catch (error) {
       console.error('Error fetching quote:', error);
       await interaction.reply('Oops! No quote available at the moment , kindly try again after some time');
