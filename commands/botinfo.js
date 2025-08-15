@@ -101,7 +101,7 @@ module.exports = {
           name: '<:strange:1311610511455944756>  **Creator Info**',
           value: `
             > **Creator**: <@1023977968562876536>
-            > **Creator Tag**: [@strange.io](https://abhineshh.netlify.app)
+            > **Creator Tag**: [@strange.io](https://abhinesh.me)
           `,
           inline: false,
         }
